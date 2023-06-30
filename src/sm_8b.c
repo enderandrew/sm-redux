@@ -6086,18 +6086,18 @@ uint16 CinematicFunction_Intro_Func219(uint16 k, uint16 j) {  // 0x8BF6FE
   return j;
 }
 
-void CinematicFunction_Intro_Func220(j) {
+void CinematicFunction_Intro_Func220(uint16 j) {
     cinematicbg_arr7[j >> 1] = 188;
     CinematicFunction_Intro_Func158(j);
 }
 
-void CinematicFunction_Intro_Func221(j) {
+void CinematicFunction_Intro_Func221(uint16 j) {
     CinematicFunction_Intro_Func160(j, UNUSED_word_7E0DF8);
     cinematicbg_arr7[j >> 1] = 196;
     CinematicFunction_Intro_Func158(j);
 }
 
-void CinematicFunction_Intro_Func222(j) {
+void CinematicFunction_Intro_Func222(uint16 j) {
     CinematicFunction_Intro_Func160(j, UNUSED_word_7E0DFA);
     cinematicbg_arr7[j >> 1] = 204;
     CinematicFunction_Intro_Func158(j);
