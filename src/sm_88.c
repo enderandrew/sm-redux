@@ -649,7 +649,12 @@ uint8 RaiseOrLowerFx(void) {  // 0x88868C
 }
 
 void HdmaobjPreInstr_XrayFunc0_NoBeam(uint16 k) {  // 0x888732
-  if ((button_config_run_b & joypad1_lastkeys) != 0) {
+    if ((button_config_itemcancel_x & joypad1_lastkeys) != 0)
+        ToggleHudItemHighlight(5, 0);
+    else
+        ToggleHudItemHighlight(5, 0x1400);
+
+  if ((button_config_itemcancel_x & joypad1_lastkeys) != 0) {
     CalculateXrayHdmaTable();
     ++demo_input_pre_instr;
   } else {
@@ -658,12 +663,19 @@ void HdmaobjPreInstr_XrayFunc0_NoBeam(uint16 k) {  // 0x888732
 }
 
 void HdmaobjPreInstr_XrayFunc1_BeamWidening(uint16 k) {  // 0x888754
-  if ((button_config_run_b & joypad1_lastkeys) != 0) {
+    if ((button_config_itemcancel_x & joypad1_lastkeys) != 0)
+        ToggleHudItemHighlight(5, 0);
+    else
+        ToggleHudItemHighlight(5, 0x1400);
+
+  if ((button_config_itemcancel_x & joypad1_lastkeys) != 0) {
     AddToHiLo(&demo_input_instr_timer, &demo_input_instr_ptr, 2048);
-    AddToHiLo(&demo_input, &demo_input_new, __PAIR32__(demo_input_instr_timer, demo_input_instr_ptr));
+    uint16 v0 = (uint16)reg_NMITIMEN;
+    AddToHiLo(&v0, &demo_input_new, __PAIR32__(demo_input_instr_timer, demo_input_instr_ptr));
+    demo_input = v0;
     if (!sign16(demo_input - 11)) {
       demo_input_new = 0;
-      demo_input = 10;
+      demo_input = 26;
       ++demo_input_pre_instr;
     }
     CalculateXrayHdmaTable();
@@ -673,7 +685,12 @@ void HdmaobjPreInstr_XrayFunc1_BeamWidening(uint16 k) {  // 0x888754
 }
 
 void HdmaobjPreInstr_XrayFunc2_FullBeam(uint16 k) {  // 0x8887AB
-  if ((button_config_run_b & joypad1_lastkeys) != 0) {
+    if ((button_config_itemcancel_x & joypad1_lastkeys) != 0)
+        ToggleHudItemHighlight(5, 0);
+    else
+        ToggleHudItemHighlight(5, 0x1400);
+
+  if ((button_config_itemcancel_x & joypad1_lastkeys) != 0) {
     HandleMovingXrayUpDown();
     CalculateXrayHdmaTable();
   } else {
@@ -696,13 +713,13 @@ void MoveXrayUp(void) {  // 0x8887E0
   if (sign16(xray_angle - 128)) {
     if (xray_angle != demo_input) {
       if ((int16)(xray_angle - demo_input) < 0
-          || (v0 = xray_angle != 0, --xray_angle, (int16)(xray_angle - (!v0 + demo_input)) < 0)) {
+          || (v0 = xray_angle != 0, xray_angle -= 2, (int16)(xray_angle - (!v0 + demo_input)) < 0)) {
         xray_angle = demo_input;
       }
     }
   } else if (demo_input + xray_angle != 256) {
     if ((int16)(demo_input + xray_angle - 256) >= 0
-        || (v1 = (__PAIR32__(demo_input, xray_angle) + __PAIR32__(xray_angle, 1)) >> 16, ++xray_angle, v1 != 256)
+        || (v1 = (__PAIR32__(demo_input, xray_angle) + __PAIR32__(xray_angle, 1)) >> 16, xray_angle += 2, v1 != 256)
         && (int16)(v1 - 256) >= 0) {
       xray_angle = 256 - demo_input;
     }
@@ -716,14 +733,14 @@ void MoveXrayDown(void) {  // 0x888835
   if (sign16(xray_angle - 128)) {
     if (demo_input + xray_angle != 128) {
       if ((int16)(demo_input + xray_angle - 128) >= 0
-          || (v0 = (__PAIR32__(demo_input, xray_angle) + __PAIR32__(xray_angle, 1)) >> 16, ++xray_angle, v0 != 128)
+          || (v0 = (__PAIR32__(demo_input, xray_angle) + __PAIR32__(xray_angle, 1)) >> 16, xray_angle += 2, v0 != 128)
           && (int16)(v0 - 128) >= 0) {
         xray_angle = 128 - demo_input;
       }
     }
   } else if (xray_angle - demo_input != 128) {
     if ((int16)(xray_angle - demo_input - 128) < 0
-        || (v1 = xray_angle != 0, --xray_angle, xray_angle - (!v1 + demo_input) != 128)
+        || (v1 = xray_angle != 0, xray_angle -= 2, xray_angle - (!v1 + demo_input) != 128)
         && (int16)(xray_angle - (!v1 + demo_input) - 128) < 0) {
       xray_angle = demo_input + 128;
     }
@@ -849,10 +866,10 @@ void HdmaobjPreInstr_XrayFunc5_DeactivateBeam(uint16 k) {  // 0x888A08
     }
     for (int i = 510/2; i >= 0; i--)
       hdma_table_1[i] = 0xff;
-    if (samus_auto_cancel_hud_item_index) {
+    /*if (samus_auto_cancel_hud_item_index) {
       hud_item_index = 0;
       samus_auto_cancel_hud_item_index = 0;
-    }
+    }*/
   }
 }
 

@@ -235,6 +235,21 @@ static const uint16 kRoomShakes[144] = {  // 0xA08687
 };
 
 void HandleRoomShaking(void) {
+    if (samus_new_pose == kPose_4F_FaceL_Dmgboost || samus_new_pose == kPose_50_FaceR_Dmgboost) {
+        samus_y_dir = 2;
+        Samus_MoveDown(IPAIR32(0xFFFA, 0));
+    }
+    else if (samus_pose == kPose_4F_FaceL_Dmgboost || samus_pose == kPose_50_FaceR_Dmgboost) {
+        debug_saved_xscroll += 1;
+        if (debug_saved_xscroll >= 0 && debug_saved_xscroll < 25) {
+            if (debug_saved_xscroll >= 16)
+                Samus_MoveDown(IPAIR32(0xFFFD, 0));
+            else if (debug_saved_xscroll >= 5)
+                Samus_MoveDown(IPAIR32(0xFFFD, 0));
+            else
+                Samus_MoveDown(IPAIR32(0xFFFB, 0));
+        }
+    }
 
   if (earthquake_timer && !time_is_frozen_flag && sign16(earthquake_type - 36)) {
     int v0 = (8 * earthquake_type) >> 1;
@@ -2051,6 +2066,9 @@ void SamusProjectileInteractionHandler(void) {  // 0xA09785
         return;
       }
       if (projectile_variables[pidx] == 8) {
+          if ((button_config_down & joypad1_lastkeys) != 0) {
+              return;
+          }
         bomb_jump_dir = (samus_x_pos == projectile_x_pos[pidx]) ? 2 :
             (int16)(samus_x_pos - projectile_x_pos[pidx]) < 0 ? 1 : 3;
       }
@@ -2077,7 +2095,7 @@ void EprojSamusCollDetect(void) {  // 0xA09894
 
 void HandleEprojCollWithSamus(uint16 k) {  // 0xA09923
   samus_invincibility_timer = 96;
-  samus_knockback_timer = 5;
+  samus_knockback_timer = 8;
   uint16 v1 = *((uint16 *)RomPtr_86(*(uint16 *)((uint8 *)eproj_id + k)) + 5);
   if (v1) {
     int v2 = k >> 1;
@@ -2198,7 +2216,7 @@ void EnemySamusCollHandler_Multibox(void) {  // 0xA09A5A
     return;
 
   if (samus_contact_damage_index) {
-    samus_invincibility_timer = 0;
+    //samus_invincibility_timer = 0;
   } else if (samus_invincibility_timer) {
     return;
   }
@@ -2426,7 +2444,7 @@ void EnemySamusCollHandler(void) {  // 0xA0A07A
   if (!E->spritemap_pointer)
     return;
   if (samus_contact_damage_index) {
-    samus_invincibility_timer = 0;
+    //samus_invincibility_timer = 0;
   } else if (samus_invincibility_timer) {
     if (E->enemy_ptr != addr_kEnemyDef_DAFF)
       return;
@@ -2547,11 +2565,19 @@ void RinkasDeathAnimation(uint16 a) {  // 0xA0A410
 }
 
 uint16 SuitDamageDivision(uint16 a) {  // 0xA0A45E
-  if ((equipped_items & 0x20) != 0)
+    if (player_data_saved[0x48 >> 1] != 0)
+        a = a << 1;
+    if ((equipped_items & 0x01) != 0)
+        a = a >> 1;
+    if ((equipped_items & 0x20) != 0)
+        a = a >> 1;
+    return a;
+
+  /*if ((equipped_items & 0x20) != 0)
     return a >> 2;
   if (equipped_items & 1)
     return a >> 1;
-  return a;
+  return a;*/
 }
 
 void NormalEnemyTouchAi(void) {  // 0xA0A477
@@ -2572,7 +2598,7 @@ void NormalEnemyTouchAiSkipDeathAnim(void) {  // 0xA0A4A1
   if (samus_contact_damage_index == 0) {
     Samus_DealDamage(SuitDamageDivision(ED->damage));
     samus_invincibility_timer = 96;
-    samus_knockback_timer = 5;
+    samus_knockback_timer = 8;
     knockback_x_dir = (int16)(samus_x_pos - E->x_pos) >= 0;
     return;
   }
@@ -2695,9 +2721,17 @@ uint16 NormalEnemyShotAiSkipDeathAnim(void) {  // 0xA0A6DE
   int16 hurt_ai_time;
   int16 v20;
   uint16 varE32;
+  uint16 pd;
 
   int v0 = collision_detection_index;
-  uint16 pd = projectile_damage[v0];
+
+  if (player_data_saved[0x48 >> 1] != 0) {
+      reduce_projectile_damage = projectile_damage[v0] >> 1;
+      pd = projectile_damage[v0] - reduce_projectile_damage;
+  }
+  else
+      pd = projectile_damage[v0];
+
   uint16 r18 = projectile_type[v0];
   EnemyData *j = gEnemyData(cur_enemy_index);
   uint16 vulnerability_ptr = get_EnemyDef_A2(j->enemy_ptr)->vulnerability_ptr;
@@ -2887,6 +2921,13 @@ CheckEnemyColl_Result Samus_CheckSolidEnemyColl(int32 amt) {  // 0xA0A8F0
       v12 = v14 < *(v9 + 5);
       uint16 v15 = v14 - *(v9 + 5);
       if (v12 || v15 < *(v10 + 5)) {
+
+          if (samus_contact_damage_index != 0 && samus_contact_damage_index < 4 && samus_collision_direction != 3 &&
+              (ED->properties & 0x8000) == 0) {
+              ED->frozen_timer = 0;
+              continue;
+          }
+
         switch (samus_collision_direction & 3) {
         case 0: {
           varE32 = ED->x_width + ED->x_pos;

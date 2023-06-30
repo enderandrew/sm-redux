@@ -503,7 +503,7 @@ void GrappleBeamFunc_BCFF(void) {  // 0x9BBCFF
 }
 
 void GrappleBeamFunc_BD44(void) {  // 0x9BBD44
-  if (grapple_beam_unkD30 && (button_config_jump_a & joypad1_newkeys) != 0) {
+  if (grapple_beam_unkD30 && (button_config_jump_b & joypad1_newkeys) != 0) {
     if (grapple_beam_unkD26) {
       if ((grapple_beam_unkD26 & 0x8000) != 0) {
         if (grapple_beam_flags && (grapple_beam_flags & 1) != 0)
@@ -687,7 +687,7 @@ void GrappleBeamHandler(void) {  // 0x9BC490
 }
 
 void GrappleBeamFunc_Inactive(void) {  // 0x9BC4F0
-  if ((button_config_shoot_x & joypad1_newkeys) != 0 || (button_config_shoot_x & joypad1_newinput_samusfilter) != 0) {
+  if ((button_config_shoot_y & joypad1_newkeys) != 0 || (button_config_shoot_y & joypad1_newinput_samusfilter) != 0) {
     GrappleBeamFunc_FireGoToCancel();
   } else if (flare_counter) {
     flare_counter = 0;
@@ -804,7 +804,7 @@ uint8 ClearCarry_12(void) {  // 0x9BC701
 }
 
 void GrappleBeamFunc_Firing(void) {  // 0x9BC703
-  if ((button_config_shoot_x & joypad1_lastkeys) == 0) {
+  if ((button_config_shoot_y & joypad1_lastkeys) == 0) {
     grapple_beam_function = FUNC16(GrappleBeamFunc_Cancel);
     return;
   }
@@ -836,14 +836,14 @@ void GrappleBeamFunc_Firing(void) {  // 0x9BC703
 }
 
 void GrappleBeamFunc_ConnectedLockedInPlace(void) {  // 0x9BC77E
-  if ((button_config_shoot_x & joypad1_lastkeys) != 0 && (GrappleBeam_CollDetect_Enemy().k || CheckIfGrappleIsConnectedToBlock())) {
+  if ((button_config_shoot_y & joypad1_lastkeys) != 0 && (GrappleBeam_CollDetect_Enemy().k || CheckIfGrappleIsConnectedToBlock())) {
   } else {
     grapple_beam_function = FUNC16(GrappleBeamFunc_Cancel);
   }
 }
 
 void GrappleBeamFunc_Connected_Swinging(void) {  // 0x9BC79D
-  if ((button_config_shoot_x & joypad1_lastkeys) != 0) {
+  if ((button_config_shoot_y & joypad1_lastkeys) != 0) {
     GrappleBeamFunc_BB64();
     if (grapple_beam_length_delta)
       BlockFunc_AC31();
@@ -874,7 +874,7 @@ LABEL_2:
 }
 
 void GrappleBeamFunc_Wallgrab(void) {  // 0x9BC814
-  if ((button_config_shoot_x & joypad1_lastkeys) != 0 && CheckIfGrappleIsConnectedToBlock() & 1) {
+  if ((button_config_shoot_y & joypad1_lastkeys) != 0 && CheckIfGrappleIsConnectedToBlock() & 1) {
 
   } else {
     grapple_walljump_timer = 30;
@@ -916,10 +916,10 @@ void GrappleBeamFunc_Cancel(void) {  // 0x9BC856
   grapple_beam_function = FUNC16(GrappleBeamFunc_Inactive);
   samus_draw_handler = FUNC16(SamusDrawHandler_Default);
   Samus_PostGrappleCollisionDetect();
-  if (samus_auto_cancel_hud_item_index) {
+  /*if (samus_auto_cancel_hud_item_index) {
     hud_item_index = 0;
     samus_auto_cancel_hud_item_index = 0;
-  }
+  }*/
 }
 
 void GrappleBeam_Func2(void) {  // 0x9BC8C5
@@ -979,10 +979,10 @@ LABEL_15:
   grapple_beam_function = FUNC16(GrappleBeamFunc_Inactive);
   samus_draw_handler = FUNC16(SamusDrawHandler_Default);
   Samus_PostGrappleCollisionDetect();
-  if (samus_auto_cancel_hud_item_index) {
+  /*if (samus_auto_cancel_hud_item_index) {
     hud_item_index = 0;
     samus_auto_cancel_hud_item_index = 0;
-  }
+  }*/
 }
 
 void GrappleBeamFunc_C9CE(void) {  // 0x9BC9CE
@@ -1022,10 +1022,10 @@ void GrappleBeamFunc_C9CE(void) {  // 0x9BC9CE
   grapple_beam_function = FUNC16(GrappleBeamFunc_Inactive);
   samus_draw_handler = FUNC16(SamusDrawHandler_Default);
   Samus_PostGrappleCollisionDetect();
-  if (samus_auto_cancel_hud_item_index) {
+  /*if (samus_auto_cancel_hud_item_index) {
     hud_item_index = 0;
     samus_auto_cancel_hud_item_index = 0;
-  }
+  }*/
 }
 
 void PropelSamusFromGrappleSwing(void) {  // 0x9BCA65
@@ -1064,9 +1064,9 @@ void PropelSamusFromGrappleSwing(void) {  // 0x9BCA65
 void GrappleBeamFunc_ReleaseFromSwing(void) {  // 0x9BCB8B
   QueueSfx1_Max15(7);
   if ((grapple_beam_unkD26 & 0x8000) == 0)
-    samus_new_pose_transitional = kPose_52_FaceL_Jump_NoAim_MoveF;
+    samus_new_pose_transitional = kPose_1A_FaceL_SpinJump;
   else
-    samus_new_pose_transitional = kPose_51_FaceR_Jump_NoAim_MoveF;
+    samus_new_pose_transitional = kPose_19_FaceR_SpinJump;
   samus_hurt_switch_index = 7;
   grapple_beam_unkD1E = 0;
   grapple_beam_unkD20 = 0;
@@ -1087,10 +1087,10 @@ void GrappleBeamFunc_ReleaseFromSwing(void) {  // 0x9BCB8B
   grapple_beam_function = FUNC16(GrappleBeamFunc_Inactive);
   samus_draw_handler = FUNC16(SamusDrawHandler_Default);
   Samus_PostGrappleCollisionDetect();
-  if (samus_auto_cancel_hud_item_index) {
+  /*if (samus_auto_cancel_hud_item_index) {
     hud_item_index = 0;
     samus_auto_cancel_hud_item_index = 0;
-  }
+  }*/
 }
 
 void CallGrappleBeamFunc(uint32 ea) {

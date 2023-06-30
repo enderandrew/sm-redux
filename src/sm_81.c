@@ -7,7 +7,7 @@
 #include "enemy_types.h"
 
 
-#define kOffsetToSaveSlot ((uint16*)RomFixedPtr(0x81812b))
+#define kOffsetToSaveSlot ((uint16*)RomFixedPtr(0x81ef20))
 #define kPackedBytesPerArea_Count ((uint8*)RomFixedPtr(0x818131))
 #define kPackedBytesPerArea_PackedOffs ((uint16*)RomFixedPtr(0x818138))
 #define kPackedBytesPerArea_UnpackedOffs ((uint16*)RomFixedPtr(0x8182d6))
@@ -28,6 +28,7 @@
 #define kSamusSpritemapTable ((uint16*)RomFixedPtr(0x92808d))
 #define g_off_93A1A1 ((uint16*)RomFixedPtr(0x93a1a1))
 #define kExpandingSquareVels ((ExpandingSquareVels*)RomFixedPtr(0x81aa34))
+#define kDifficulty ((uint16*)RomFixedPtr(0x81fa21))
 
 
 
@@ -37,7 +38,56 @@ void SoftReset(void) {
   game_state = 0xffff;
 }
 
-void SaveToSram(uint16 a) {  // 0x818000
+void SaveToSram(uint16 a) {
+    uint16 r14 = 0;
+    uint16 r12 = 2 * (a & 3);
+    uint16 X, Y = 0;
+    X = 256 * (area_index + 1);
+    Y = 0xFE;
+    do {    //save map
+        (explored_map_tiles_saved-1)[X >> 1] = *(uint16*)&map_tiles_explored[Y];
+        X -= 2;
+        Y -= 2;
+    } while ((int16)Y >= 0);
+    for (int i = 94; i >= 0; i -= 2) //copy sram
+        player_data_saved[i >> 1] = *(uint16*)((uint8*)&equipped_items + i);
+    sram_save_station_index = load_station_index;
+    sram_area_index = area_index;
+    X = kOffsetToSaveSlot[r12 >> 1];
+    Y = 0;
+    do {    //save items to sram
+        kSramChecksum[X >> 1] = player_data_saved[Y >> 1];
+        r14 = (r14 + player_data_saved[Y >> 1]) + 1;
+        X += 2;
+        Y += 2;
+    } while (Y != 0x160);
+    Y = 0x6FE;
+    do {    //save map to sram
+        kSramChecksum[X >> 1] = explored_map_tiles_saved[Y >> 1];
+        X += 2;
+        Y -= 2;
+    } while ((int16)Y >= 0);
+    Y = 0xFE;
+    do {    //save extra sram
+        kSramChecksum[X >> 1] = extra_sram_7E[Y >> 1];
+        X += 2;
+        Y -= 2;
+    } while ((int16)Y >= 0);
+    Y = 0xFE;
+    X = 0x1E10;
+    do {    //save extra sram
+        kSramChecksum[X >> 1] = extra_sram_7F[Y >> 1];
+        X += 2;
+        Y -= 2;
+    } while ((int16)Y >= 0);
+    kSramChecksum[r12 >> 1] = r14;
+    kSramChecksumUpper[r12 >> 1] = r14;
+    kSramChecksumInverted[r12 >> 1] = ~r14;
+    kSramChecksumInvertedUpper[r12 >> 1] = ~r14;
+    RtlWriteSram();
+}
+
+/*void SaveToSram1(uint16 a) {  // 0x818000
   uint16 v7;
   uint16 v11;
 
@@ -73,9 +123,71 @@ void SaveToSram(uint16 a) {  // 0x818000
   *(uint16 *)(&g_sram[2 * v10 + 0x1FF8]) = v11;
 
   RtlWriteSram();
+}*/
+
+uint8 LoadFromSram(uint16 a) {
+    uint16 A, X, Y = 0;
+    uint16 r14 = 0;
+    uint16 r12 = 2 * (a & 3);
+    uint16 r16 = kOffsetToSaveSlot[r12 >> 1];
+    X = r16;
+    Y = 0;
+    do {    //load sram items
+        player_data_saved[Y >> 1] = kSramChecksum[X >> 1];
+        r14 = (r14 + kSramChecksum[X >> 1]) + 1;
+        X += 2;
+        Y += 2;
+    } while (Y != 0x160);
+    Y = 0x6FE;
+    do {    //load sram maps
+        explored_map_tiles_saved[Y >> 1] = kSramChecksum[X >> 1];
+        X += 2;
+        Y -= 2;
+    } while ((int16)Y >= 0);
+    Y = 0xFE;
+    do {    //load extra sram
+        extra_sram_7E[Y >> 1] = kSramChecksum[X >> 1];
+        X += 2;
+        Y -= 2;
+    } while ((int16)Y >= 0);
+    Y = 0xFE;
+    X = 0x1E10;
+    do {    //load extra sram
+        extra_sram_7F[Y >> 1] = kSramChecksum[X >> 1];
+        X += 2;
+        Y -= 2;
+    } while ((int16)Y >= 0);
+
+    if ((kSramChecksum[r12 >> 1] == r14 && (kSramChecksum[r12 >> 1] ^ 0xFFF) == r14) || 
+        (r14 == kSramChecksumUpper[r12 >> 1] && (r14 ^ 0xFFFF) == kSramChecksumInvertedUpper[r12 >> 1])) {
+        for (int i = 94; i >= 0; i -= 2)    //load equipment
+            *(uint16*)((uint8*)&equipped_items + i) = player_data_saved[i >> 1];
+        load_station_index = sram_save_station_index;
+        area_index = sram_area_index;
+        return 0;
+    }
+    else if ((kSramChecksum[r12 >> 1] == r14 && (kSramChecksum[r12 >> 1] ^ 0xFFF) == r14) ||
+        (kSramChecksum[r12 >> 1] == kSramChecksumUpper[r12 >> 1] && (kSramChecksum[r12 >> 1] ^ 0xFFFF) == kSramChecksumInvertedUpper[r12 >> 1])) {
+        for (int i = 94; i >= 0; i -= 2)    //load equipment
+            *(uint16*)((uint8*)&equipped_items + i) = player_data_saved[i >> 1];
+        load_station_index = sram_save_station_index;
+        area_index = sram_area_index;
+        return 0;
+    }
+    else {
+        X = r16;
+        Y = 0x9FE;
+        A = 0;
+        do {    //clear sram
+            kSramChecksum[X >> 1] = 0;
+            X += 2;
+            Y -= 2;
+        } while ((int16)Y >= 0);
+        return 1;
+    }
 }
 
-uint8 LoadFromSram(uint16 a) {  // 0x818085
+/*uint8 LoadFromSram1(uint16 a) {  // 0x818085
   uint16 r20 = 0;
   uint16 r18 = 2 * (a & 3);
   uint16 v1 = kOffsetToSaveSlot[a & 3];
@@ -111,9 +223,38 @@ uint8 LoadFromSram(uint16 a) {  // 0x818085
     area_index = 0;
     return 1;
   }
+}*/
+
+void UnpackMapFromSave(void) {
+    uint16 A, X, Y;
+    uint16 v0, v3, v5, r15, r16;
+    uint8 v2, r12;
+    v0 = 0xF800;
+    v2 = 0x81;
+    v3 = 0xCD52;
+    v5 = 0x7E;
+    X = 0x702;
+    A = 0;
+    do {
+        (explored_map_tiles_saved-1)[X >> 1] = A;
+        X -= 2;
+    } while (X != 0);
+    r15 = 0;
+    r16 = 0;
+    do {
+        r12 = kPackedBytesPerArea_Count[A];
+        do {
+            Y = *RomPtr_81(v0) + r15;
+            ((uint8*)explored_map_tiles_saved)[Y] = compressed_map_data[X];
+            v0 += 1;
+            X += 1;
+            r12 -= 1;
+        } while (r12 != 0);
+        r16 += 1;
+    } while (r16 < 7);
 }
 
-void UnpackMapFromSave(void) {  // 0x8182E4
+/*void UnpackMapFromSave(void) {  // 0x8182E4
   for (int i = 1792; i >= 0; i -= 2)
     explored_map_tiles_saved[i >> 1] = 0;
   for(int i = 0; i < 6; i++) {
@@ -126,9 +267,33 @@ void UnpackMapFromSave(void) {  // 0x8182E4
       unpacked[v4] = compressed_map_data[v3++];
     } while (--n);
   }
+}*/
+
+void PackMapToSave(void) {
+    uint16 A, X, Y;
+    uint16 v0, v3, v5, v19, v1A;
+    uint8 r16;
+    v19 = 0;
+    v1A = 0;
+    v0 = 0xF800;
+    v3 = 0xCD52;
+    v5 = 0x7E;
+    A = 0;
+    X = 0;
+    do {
+        r16 = kPackedBytesPerArea_Count[X];
+        do {
+            Y = *RomPtr_81(v0) + v19;
+            compressed_map_data[X] = ((uint8*)explored_map_tiles_saved)[Y];
+            v0 += 1;
+            X += 1;
+            r16 -= 1;
+        } while (r16 != 0);
+        v1A += 1;
+    } while (v1A < 7);
 }
 
-void PackMapToSave(void) {  // 0x81834B
+/*void PackMapToSave(void) {  // 0x81834B
   for (int i = 0; i < 6; i++) {
     int n = kPackedBytesPerArea_Count[i];
     const uint8 *r0 = RomPtr_81(kPackedBytesPerArea_UnpackedOffs[i]);
@@ -139,7 +304,7 @@ void PackMapToSave(void) {  // 0x81834B
       compressed_map_data[v1++] = unpacked[v3];
     } while (--n);
   }
-}
+}*/
 
 void DrawSpritemap(uint8 db, uint16 j, uint16 x_r20, uint16 y_r18, uint16 chr_r22) {  // 0x81879F
   const uint8 *pp = RomPtrWithBank(db, j);
@@ -407,7 +572,7 @@ void LoadInitialMenuTiles(void) {  // 0x818DDB
   WriteReg(VMADDL, 0);
   WriteReg(VMADDH, 0x60);
   WriteReg(VMAIN, 0x80);
-  static const StartDmaCopy unk_818E31 = { 1, 1, 0x18, LONGPTR(0xb6c000), 0x2000 };
+  static const StartDmaCopy unk_818E31 = { 1, 1, 0x18, LONGPTR(0xb8e000), 0x2000 };
   SetupDmaTransfer(&unk_818E31);
   WriteReg(MDMAEN, 2);
   WriteReg(VMADDL, 0);
@@ -1079,7 +1244,7 @@ void FileSelectMenu_13_FileCopyDoIt(void) {  // 0x819A2C
   DrawFileCopyArrow();
   uint16 src_addr = kOffsetToSaveSlot[eproj_id[16]];
   uint16 dst_addr = kOffsetToSaveSlot[eproj_id[17]];
-  memcpy(&g_sram[dst_addr], &g_sram[src_addr], 1628);
+  memcpy(&g_sram[dst_addr], &g_sram[src_addr], 2560);
   int v2 = eproj_id[16];
   int v10 = *(uint16 *)(&g_sram[2 * v2 + 0x1FF0]);
   int v9 = *(uint16 *)(&g_sram[2 * v2 + 0x1FF8]);
@@ -1243,7 +1408,7 @@ void FileSelectMenu_25_FileClearDoClear(void) {  // 0x819C9E
 
   DrawBorderAroundDataClearMode();
   int sram_addr = kOffsetToSaveSlot[eproj_id[16]];
-  memset(&g_sram[sram_addr], 0, 1628);
+  memset(&g_sram[sram_addr], 0, 2560);
 
   uint16 v1 = 2 * eproj_id[16];
   int v2 = eproj_id[16];
@@ -1521,6 +1686,14 @@ void DrawFileSelectionHealth(uint16 a, uint16 k) {  // 0x81A087
     q = q % 10;
     *(uint16 *)((uint8 *)&ram3000.pause_menu_map_tilemap[802] + k) = enemy_data[0].palette_index | (q + 8288);
     *(uint16 *)((uint8 *)&ram3000.pause_menu_map_tilemap[801] + k) = enemy_data[0].palette_index | (n + 8288);
+
+    uint16* var = (uint16*)RomPtr_81(kDifficulty[difficulty_flag]);
+    uint16 var2 = k;
+    while (*var != 0xFFFF) {
+        *(uint16*)((uint8*)&ram3000.pause_menu_map_tilemap[821] + (var2)) = *var;
+        var += 1;
+        var2 += 2;
+    }
   }
 }
 
@@ -2454,20 +2627,20 @@ void NewSaveFile(void) {  // 0x81B2CB
   button_config_down = kButton_Down;
   button_config_left = kButton_Left;
   button_config_right = kButton_Right;
-  button_config_jump_a = kButton_A;
-  button_config_run_b = kButton_B;
-  button_config_shoot_x = kButton_X;
-  button_config_itemcancel_y = kButton_Y;
+  button_config_run_a = kButton_A;
+  button_config_jump_b = kButton_B;
+  button_config_itemcancel_x = kButton_X;
+  button_config_shoot_y = kButton_Y;
   button_config_itemswitch = kButton_Select;
-  button_config_aim_up_R = kButton_R;
-  button_config_aim_down_L = kButton_L;
+  button_config_aim_down_R = kButton_R;
+  button_config_aim_up_L = kButton_L;
   game_time_frames = 0;
   game_time_seconds = 0;
   game_time_minutes = 0;
   game_time_hours = 0;
   japanese_text_flag = 0;
-  moonwalk_flag = 0;
-  hud_auto_cancel_flag = 0;
+  difficulty_flag = 0;
+  moonwalk_flag = 1;
   debug_flag = 1;
   UNUSED_word_7E09E8 = 1;
   uint16 v0 = 0;

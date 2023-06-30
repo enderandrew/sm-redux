@@ -1611,13 +1611,14 @@ void PauseHook_Kraid(void) {  // 0xA7C325
 
   uint16 v0 = vram_read_queue_tail;
   v1 = vram_read_queue_tail;
-  *(uint16 *)((uint8 *)&vram_read_queue[0].vram_target + vram_read_queue_tail) = ((reg_BG12NBA & 0xFC) << 8) + 15872;
-  *(uint16 *)((uint8 *)&vram_read_queue[0].dma_parameters + v1) = 129;
-  *(uint16 *)((uint8 *)&vram_read_queue[0].dma_parameters + v0 + 1) = 57;
-  *(VoidP *)((uint8 *)&vram_read_queue[0].src.addr + v0) = 20480;
-  *(uint16 *)(&vram_read_queue[0].src.bank + v0) = 126;
-  *(uint16 *)((uint8 *)&vram_read_queue[0].size + v0) = 1024;
+  *(uint16 *)((uint8 *)&vram_read_queue[0].vram_target + vram_read_queue_tail) = 0x3E00;
+  *(uint16 *)((uint8 *)&vram_read_queue[0].dma_parameters + v1) = 0x81;
+  *(uint16 *)((uint8 *)&vram_read_queue[0].dma_parameters + v0 + 1) = 0x39;
+  *(VoidP *)((uint8 *)&vram_read_queue[0].src.addr + v0) = 0x5000;
+  *(uint16 *)(&vram_read_queue[0].src.bank + v0) = 0x7E;
+  *(uint16 *)((uint8 *)&vram_read_queue[0].size + v0) = 0x0400;
   vram_read_queue_tail = v0 + 9;
+  ClearBG3();
 }
 
 void Kraid_Death_Init(void) {  // 0xA7C360

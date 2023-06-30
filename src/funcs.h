@@ -383,6 +383,9 @@ void DrawDebugElevatorMapIcons(uint16 a, uint16 k, uint16 r3);
 void DrawDebugSaveMapIcons(uint16 a, uint16 k, uint16 r3);
 void DrawFileCopyArrow(void);
 void DrawFileSelectMapIcons(void);
+void DrawGameTime(void);
+void DrawItemPercent(void);
+void DrawItemMapIcons(void);
 void DrawLrHighlight(void);
 void DrawMapIcons(void);
 void DrawMapIconsOfType(uint16 a, uint16 r34, uint16 r36, uint16 r3);
@@ -519,6 +522,7 @@ void LoadNewMusicTrackIfChanged(void);
 void LoadPauseMenuMapTilemap(void);
 void LoadPauseMenuMapTilemapAndAreaLabel(void);
 void LoadPauseMenuTilesAndClearBG2(void);
+void ClearBG3(void);
 void LoadPauseScreenBaseTilemaps(void);
 void LoadRoomHeader(void);
 void LoadRoomMusic(void);
@@ -570,6 +574,7 @@ void SetPauseScreenButtonLabelPalettes(void);
 void SetPauseScreenButtonLabelPalettes_0(void);
 void SetPauseScreenButtonLabelPalettes_1(void);
 void SetPauseScreenButtonLabelPalettes_2(void);
+void SetPauseScreenSuitPalettes(void);
 void SetupMapScrollingForFileSelectMap(void);
 void SetupMapScrollingForPauseMenu(uint16 a);
 void SetupPpuForGameplayResume(void);
@@ -1166,6 +1171,7 @@ void KillProjectileFunc_8(uint16 j);
 void LoadProjectilePalette(uint16 a);
 void MainScrollingRoutine(void);
 void Missile_Func1(uint16 k);
+void Missile_Func11(uint16 k);
 void Missile_Func2(void);
 void MoveSamusWithControlPad(void);
 void PowerBomb_Func3(void);
@@ -4655,6 +4661,7 @@ void VerifySRAM(void);
 #define fnsub_84EE86 0x84EE86
 #define fnsub_84EE8E 0x84EE8E
 #define fnsub_84EEAB 0x84EEAB
+#define fnPlmInstr_SkipItem 0x84EFFE
 #define fnWriteLargeMessageBoxTilemap 0x85825A
 #define fnWriteSmallMessageBoxTilemap 0x858289
 #define fnDrawShootButtonAndSetupPpuForLargeMessageBox 0x8583C5
@@ -5496,6 +5503,9 @@ void VerifySRAM(void);
 #define fnCinematicSprInstr_Func217 0x8BF604
 #define fnCinematicSprInstr_Func218 0x8BF651
 #define fnCinematicFunction_Intro_Func219 0x8BF6FE
+#define fnCinematicFunction_Intro_Func220 0x8BF7A3
+#define fnCinematicFunction_Intro_Func221 0x8BF7AC
+#define fnCinematicFunction_Intro_Func222 0x8BF7BB
 #define fnPalPreInstr_nullsub_129 0x8DC526
 #define fnPalInstr_Wait 0x8DC595
 #define fnPalInstr_ColorPlus2 0x8DC599
@@ -5668,6 +5678,8 @@ void VerifySRAM(void);
 #define fnRoomDefStateSelect_PowerBombs 0x8FE669
 #define fnRoomCode_CrocomireShaking 0x8FE8CD
 #define fnRoomCode_RidleyRoomShaking 0x8FE950
+#define fnRoomCode_SetSidehopperEvent 0x8FE9A0
+#define fnRoomCode_ClearEnemy 0x8FE9A8
 #define fnnullsub_12 0x908077
 #define fnSamus_Draw 0x9085E2
 #define fnnullsub_3 0x9092E9

@@ -1409,7 +1409,7 @@ void GunshipTop_2(uint16 k) {  // 0xA2A7D8
 
 void GunshipTop_3(uint16 k) {  // 0xA2A80C
   Enemy_GunshipTop *E = Get_GunshipTop(k);
-  if (sign16(E->base.y_pos - 768)) {
+  if (sign16(E->base.y_pos - 746)) {
     AddToHiLo(&samus_y_pos, &samus_y_subpos, 0x48000);
     Enemy_GunshipTop *v3 = Get_GunshipTop(k + 128);
     AddToHiLo(&v3->base.y_pos, &v3->base.y_subpos, 0x48000);
@@ -1495,6 +1495,12 @@ void GunshipTop_7(uint16 k) {  // 0xA2A987
     loading_game_state = kLoadingGameState_5_Main;
     *(uint16 *)used_save_stations_and_elevators |= 1;
     load_station_index = 0;
+
+    if (difficulty_flag != 0)
+        player_data_saved[0x48 >> 1] = 1;
+    else
+        player_data_saved[0x48 >> 1] = 0;
+
     SaveToSram(selected_save_slot);
   }
 }

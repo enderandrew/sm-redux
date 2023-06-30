@@ -1787,6 +1787,9 @@ enum Consts_8B {
   addr_stru_8BF6F8 = 0xF6F8,
   addr_kCinematicBgObjectDef_8BF748 = 0xF748,
   addr_kCinematicBgObjectDef_8BF74E = 0xF74E,
+  addr_kCinematicSpriteObjectDef_8BF791 = 0xF791,
+  addr_kCinematicSpriteObjectDef_8BF797 = 0xF797,
+  addr_kCinematicSpriteObjectDef_8BF79D = 0xF79D,
 };
 enum Consts_8C {
   addr_kSpriteMap_NintendoLogo = 0x80BB,
@@ -2564,7 +2567,7 @@ struct Vulnerability; static inline Vulnerability *get_Vulnerability(uint16 a) {
 struct ExtendedSpriteMap; static inline ExtendedSpriteMap *get_ExtendedSpriteMap(uint8 db, uint16 a) { return (ExtendedSpriteMap *)RomPtr(db << 16 | a); }
 struct Hitbox; static inline Hitbox *get_Hitbox(uint8 db, uint16 a) { return (Hitbox *)RomPtr(db << 16 | a); }
 struct Mode7CgvmWriteQueue; static inline Mode7CgvmWriteQueue *get_Mode7CgvmWriteQueue(uint16 a) { return (Mode7CgvmWriteQueue *)RomPtr(0x800000 | a); }
-struct PoseEntry; static inline PoseEntry *get_PoseEntry(uint16 a) { return (PoseEntry *)RomPtr(0x910000 | a); }
+struct PoseEntry; static inline PoseEntry *get_PoseEntry(uint16 a) { return (PoseEntry *)RomPtr(0xB80000 | a); }
 struct ProjectileDataTable; static inline ProjectileDataTable *get_ProjectileDataTable(uint16 a) { return (ProjectileDataTable *)RomPtr(0x930000 | a); }
 struct DemoInputObject; static inline DemoInputObject *get_DemoInputObject(uint16 a) { return (DemoInputObject *)RomPtr(0x910000 | a); }
 struct DemoRoomData; static inline DemoRoomData *get_DemoRoomData(uint16 a) { return (DemoRoomData *)RomPtr(0x820000 | a); }

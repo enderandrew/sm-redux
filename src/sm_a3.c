@@ -528,10 +528,15 @@ void Elevator_Func_2(void) {  // 0xA39579
   Enemy_Elevator *E = Get_Elevator(cur_enemy_index);
   if (E->elevat_parameter_1) {
     elevator_direction = 0x8000;
-    AddToHiLo(&E->base.y_pos, &E->base.y_subpos, -0x18000);
+    AddToHiLo(&E->base.y_pos, &E->base.y_subpos, -0x28000);
   } else {
     elevator_direction = 0;
-    AddToHiLo(&E->base.y_pos, &E->base.y_subpos, 0x18000);
+
+    if (game_state == kGameState_8_MainGameplay)
+        E->base.y_pos += 1;
+    E->base.y_pos += 1;
+
+    //AddToHiLo(&E->base.y_pos, &E->base.y_subpos, 0x18000);
   }
   Elevator_Func_4();
 }
@@ -544,13 +549,13 @@ void Elevator_Func_3(void) {  // 0xA395B9
 void Elevator_Func3b(void) {  // 0xA395BC
   Enemy_Elevator *E = Get_Elevator(cur_enemy_index);
   if (E->elevat_parameter_1) {
-    AddToHiLo(&E->base.y_pos, &E->base.y_subpos, 0x18000);
+    AddToHiLo(&E->base.y_pos, &E->base.y_subpos, 0x28000);
     if (E->base.y_pos < E->elevat_var_A) {
       Elevator_Func_4();
       return;
     }
   } else {
-    AddToHiLo(&E->base.y_pos, &E->base.y_subpos, -0x18000);
+    AddToHiLo(&E->base.y_pos, &E->base.y_subpos, -0x28000);
     if (E->base.y_pos >= E->elevat_var_A) {
       Elevator_Func_4();
       return;

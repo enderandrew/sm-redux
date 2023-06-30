@@ -4680,6 +4680,17 @@ static Func_V *const off_86F0AD[7] = {  // 0x86EFE0
 
 void EprojPreInstr_Pickup(uint16 k) {
   int v1 = k >> 1;
+  if (samus_charge_palette_index > 0) {     //tractor beam
+      if (samus_x_pos < eproj_x_pos[v1])
+          eproj_x_pos[v1] -= 1;
+      else if (samus_x_pos > eproj_x_pos[v1])
+          eproj_x_pos[v1] += 1;
+      if (samus_y_pos < eproj_y_pos[v1])
+          eproj_y_pos[v1] -= 1;
+      else if (samus_y_pos > eproj_y_pos[v1])
+          eproj_y_pos[v1] += 1;
+  }
+
   if (!--eproj_F[v1])
     goto LABEL_7;
   if (CallSomeSamusCode(0xD)) {
@@ -4723,12 +4734,18 @@ LABEL_7:;
 }
 
 void Eproj_Pickup_SmallHealth(void) {  // 0x86F0BB
-  Samus_RestoreHealth(5);
+  if (player_data_saved[36] != 0)
+      Samus_RestoreHealth(2);
+  else
+      Samus_RestoreHealth(5);
   QueueSfx2_Max1(1);
 }
 
 void Eproj_Pickup_BigHealth(void) {  // 0x86F0CA
-  Samus_RestoreHealth(0x14);
+  if (player_data_saved[36] != 0)
+      Samus_RestoreHealth(10);
+  else
+      Samus_RestoreHealth(20);
   QueueSfx2_Max1(2);
 }
 
@@ -4738,7 +4755,10 @@ void Eproj_Pickup_PowerBombs(void) {  // 0x86F0D9
 }
 
 void Eproj_Pickup_Missiles(void) {  // 0x86F0E8
-  Samus_RestoreMissiles(2);
+  if (player_data_saved[36] != 0)
+      Samus_RestoreMissiles(1);
+  else
+      Samus_RestoreMissiles(2);
   QueueSfx2_Max1(3);
 }
 

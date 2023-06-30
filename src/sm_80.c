@@ -225,6 +225,11 @@ void InvalidInterrupt_Crash(void) {  // 0x808573
 }
 
 void LoadMirrorOfExploredMapTiles(void) {  // 0x80858C
+    if (player_data_saved[0x48 >> 1] != 0)
+        difficulty_flag = 1;
+    else
+        difficulty_flag = 0;
+
   uint16 v1 = swap16(area_index);
   uint16 v2 = 0;
   do {
@@ -662,6 +667,9 @@ void HandleMusicQueue(void) {  // 0x808F0C
     }
     uint8 v1 = music_entry & 0x7F;
     music_track_index = music_entry & 0x7F;
+
+    //if (tilemap_stuff[1] == 53) //msu1 implementation, but there isn't msu1 support yet
+    
     RtlApuWrite(APUI00, music_entry & 0x7F);
     cur_music_track = v1;
     sound_handler_downtime = 8;
@@ -1076,7 +1084,7 @@ void Vector_NMI(void) {  // 0x809583
 
 void CopyToVramNow(uint16 vram_dst, uint32 src, uint16 size) {
   // src can point either to ram or rom
-  WriteReg(INIDISP, 0x80);
+  WriteReg(INIDISP, 0x80);  //to do later, but i think flag is added as parameter
   WriteRegWord(VMADDL, vram_dst);
   WriteRegWord(DMAP1, 0x1801);
   WriteRegWord(A1T1L, (uint16)src);
@@ -1392,10 +1400,10 @@ void HandleHudTilemap(void) {  // 0x809B44
     samus_prev_power_bombs = samus_power_bombs;
     DrawTwoHudDigits(addrl_kDigitTilesetsWeapon, samus_power_bombs, 0xA2);
   }
-  if (hud_item_index != samus_prev_hud_item_index) {
-    ToggleHudItemHighlight(hud_item_index, 0x1000);
+  if (samus_auto_cancel_hud_item_index != samus_prev_hud_item_index) {
+    ToggleHudItemHighlight(samus_auto_cancel_hud_item_index, 0x1000);
     ToggleHudItemHighlight(samus_prev_hud_item_index, 0x1400);
-    samus_prev_hud_item_index = hud_item_index;
+    samus_prev_hud_item_index = samus_auto_cancel_hud_item_index;
     if (samus_movement_type != 3
         && samus_movement_type != 20
         && grapple_beam_function == 0xC4F0
@@ -1403,10 +1411,10 @@ void HandleHudTilemap(void) {  // 0x809B44
       QueueSfx1_Max6(0x39);
     }
   }
-  uint16 v4 = 5120;
+  /*uint16 v4 = 5120;
   if ((nmi_frame_counter_byte & 0x10) != 0)
     v4 = 4096;
-  ToggleHudItemHighlight(samus_auto_cancel_hud_item_index, v4);
+  ToggleHudItemHighlight(samus_auto_cancel_hud_item_index, v4);*/
   uint16 v5 = vram_write_queue_tail;
   gVramWriteEntry(vram_write_queue_tail)->size = 192;
   v5 += 2;
@@ -1616,7 +1624,7 @@ CoroutineRet StartGameplay_Async(void) {  // 0x80A07B
   LoadLevelDataAndOtherThings();
   LoadFXHeader();
   LoadLibraryBackground();
-  CalculateLayer2Xpos();
+  CalculateLayer2Xpos();    //call
   CalculateLayer2Ypos();
   bg2_x_scroll = layer2_x_pos;
   bg2_y_scroll = layer2_y_pos;
@@ -1686,7 +1694,7 @@ void DisplayViewablePartOfRoom(void) {  // 0x80A176
 
 void QueueClearingOfFxTilemap(void) {  // 0x80A211
   for (int i = 3838; i >= 0; i -= 2)
-    *(uint16 *)((uint8 *)ram4000.xray_tilemaps + (uint16)i) = 6222;
+    *(uint16 *)((uint8 *)ram4000.xray_tilemaps + (uint16)i) = 6159;
   uint16 v1 = vram_write_queue_tail;
   VramWriteEntry *v2 = gVramWriteEntry(vram_write_queue_tail);
   v2->size = 3840;
@@ -1716,14 +1724,14 @@ void ClearBG2Tilemap(void) {  // 0x80A23F
 void ClearFXTilemap(void) {  // 0x80A29C
   WriteRegWord(VMADDL, 0x5880);
   WriteRegWord(DMAP1, 0x1808);
-  WriteRegWord(A1T1L, 0xA2F7);
+  WriteRegWord(A1T1L, 0xA2DF);  //originally 0xA2F7
   WriteRegWord(A1B1, 0x80);
   WriteRegWord(DAS1L, 0x780);
   WriteReg(VMAIN, 0);
   WriteReg(MDMAEN, 2);
   WriteRegWord(VMADDL, 0x5880);
   WriteRegWord(DMAP1, 0x1908);
-  WriteRegWord(A1T1L, 0xA2F8);
+  WriteRegWord(A1T1L, 0xA2E0);  //originally A2F8
   WriteRegWord(A1B1, 0x80);
   WriteRegWord(DAS1L, 0x780);
   WriteReg(VMAIN, 0x80);
@@ -2373,11 +2381,11 @@ uint8 DoorTransition_Right(void) {  // 0x80AE7E
   uint16 v2 = door_transition_frame_counter;
   AddToHiLo(&samus_x_pos, &samus_x_subpos, __PAIR32__(samus_door_transition_speed, samus_door_transition_subspeed));
   samus_prev_x_pos = samus_x_pos;
-  layer1_x_pos += 4;
-  layer2_x_pos += 4;
+  layer1_x_pos += 8;
+  layer2_x_pos += 8;
   UpdateScrollVarsUpdateMap();
   door_transition_frame_counter = v2 + 1;
-  if (v2 != 63)
+  if (v2 != 31)
     return 0;
   UpdateScrollVarsUpdateMap();
   return 1;
@@ -2387,11 +2395,11 @@ uint8 DoorTransition_Left(void) {  // 0x80AEC2
   uint16 v2 = door_transition_frame_counter;
   AddToHiLo(&samus_x_pos, &samus_x_subpos, -IPAIR32(samus_door_transition_speed, samus_door_transition_subspeed));
   samus_prev_x_pos = samus_x_pos;
-  layer1_x_pos -= 4;
-  layer2_x_pos -= 4;
+  layer1_x_pos -= 8;
+  layer2_x_pos -= 8;
   UpdateScrollVarsUpdateMap();
   door_transition_frame_counter = v2 + 1;
-  return v2 == 63;
+  return v2 == 31;
 }
 
 uint8 DoorTransition_Down(void) {  // 0x80AF02
@@ -2400,8 +2408,8 @@ uint8 DoorTransition_Down(void) {  // 0x80AF02
     if (door_transition_frame_counter < 0x39) {
       AddToHiLo(&samus_y_pos, &samus_y_subpos, __PAIR32__(samus_door_transition_speed, samus_door_transition_subspeed));
       samus_prev_y_pos = samus_y_pos;
-      layer1_y_pos += 4;
-      layer2_y_pos += 4;
+      layer1_y_pos += 8;
+      layer2_y_pos += 8;
       UpdateScrollVarsUpdateMap();
     }
   } else {
@@ -2422,7 +2430,7 @@ uint8 DoorTransition_Down(void) {  // 0x80AF02
     reg_BG1VOFS = v5;
   }
   door_transition_frame_counter = v6 + 1;
-  if ((uint16)(v6 + 1) < 0x39)
+  if ((uint16)(v6 + 1) < 0x1D)
     return 0;
   UpdateScrollVarsUpdateMap();
   return 1;
@@ -2433,9 +2441,9 @@ uint8 DoorTransition_Up(void) {  // 0x80AF89
   if (door_transition_frame_counter) {
     AddToHiLo(&samus_y_pos, &samus_y_subpos, -IPAIR32(samus_door_transition_speed, samus_door_transition_subspeed));
     samus_prev_y_pos = samus_y_pos;
-    layer1_y_pos -= 4;
-    layer2_y_pos -= 4;
-    if (door_transition_frame_counter >= 5) {
+    layer1_y_pos -= 8;
+    layer2_y_pos -= 8;
+    if (door_transition_frame_counter >= 3) {
       UpdateScrollVarsUpdateMap();
     } else {
       reg_BG1HOFS = bg1_x_offset + layer1_x_pos;
@@ -2461,7 +2469,7 @@ uint8 DoorTransition_Up(void) {  // 0x80AF89
     reg_BG1VOFS = v5;
   }
   door_transition_frame_counter = v6 + 1;
-  return v6 == 56;
+  return v6 == 28;
 }
 
 void ConfigureMode7RotationMatrix(void) {  // 0x80B0C2

@@ -84,6 +84,7 @@ static inline const uint8 *RomPtr_A9(uint16_t addr) { return RomPtr(0xa90000 | a
 static inline const uint8 *RomPtr_AD(uint16_t addr) { return RomPtr(0xad0000 | addr); }
 static inline const uint8 *RomPtr_B3(uint16_t addr) { return RomPtr(0xb30000 | addr); }
 static inline const uint8 *RomPtr_B4(uint16_t addr) { return RomPtr(0xb40000 | addr); }
+static inline const uint8* RomPtr_B6(uint16_t addr) { return RomPtr(0xb60000 | addr); }
 static inline const uint8 *RomPtr_B7(uint16_t addr) { return RomPtr(0xb70000 | addr); }
 static inline const uint8 *RomPtrWithBank(uint8 bank, uint16_t addr) { return RomPtr((bank << 16) | addr); }
 static inline const uint8 *RomBankBase(uint8 bank) { return RomPtr((bank << 16) + 0x8000) - 0x8000; }
@@ -161,7 +162,7 @@ PairU16 MakePairU16(uint16 k, uint16 j);
 #define kPlayerPoseToPtr ((uint16*)RomFixedPtr(0x90c7df))
 #define kDrawArmCannon_Tab2 ((uint16*)RomFixedPtr(0x90c7a5))
 extern const int16 kSinCosTable8bit_Sext[320];
-#define kPoseTransitionTable ((uint16*)RomFixedPtr(0x919ee2))
+#define kPoseTransitionTable ((uint16*)RomFixedPtr(0xb8a000))
 #define kDemoSetDefPtrs ((uint16*)RomFixedPtr(0x918885))
 #define kSpeedBoostToCtr ((uint16*)RomFixedPtr(0x91b61f))
 #define kSpeedBoostToAnimFramePtr ((uint16 *)RomFixedPtr(0x91B5DE))

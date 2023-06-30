@@ -451,6 +451,10 @@ void RoomCode_CeresColorMathHdma_BgBase(void) {  // 0x8FC97B
   hdma_data_table_in_ceres = 9;
 }
 
+void RoomCode_SetSideHopperEvent(void) {  //0x8FE9A0
+    SetEventHappened(1);
+}
+
 void DoorCode_StartWreckedSkipTreadmill_East(void) {  // 0x8FE1D8
   SpawnAnimtiles(addr_kAnimtiles_WreckedShipTradmillLeft);
   SpawnHardcodedPlm((SpawnHardcodedPlmArgs) { 0x04, 0x09, 0xb64f });
@@ -778,6 +782,7 @@ void CallRoomSetupCode(uint32 ea) {
   case fnRoomCode_SetCeresDoorSolid: RoomCode_SetCeresDoorSolid(); return;
   case fnRoomCode_CeresColorMathHdma: RoomCode_CeresColorMathHdma(); return;
   case fnRoomCode_CeresColorMathHdma_BgBase: RoomCode_CeresColorMathHdma_BgBase(); return;
+  case fnRoomCode_SetSidehopperEvent: RoomCode_SetSideHopperEvent(); return;
   default: Unreachable();
   }
 }
@@ -923,6 +928,11 @@ void RoomCode_RidleyRoomShaking(void) {  // 0x8FE950
   }
 }
 
+void RoomCode_ClearEnemy(void) {  // 0x8FE9A8
+    enemy_data[0].enemy_ptr = 0;
+    enemy_data[1].enemy_ptr = 0;
+}
+
 void CallRoomCode(uint32 ea) {
   switch (ea) {
   case fnRoomCode_ScrollingSkyLand_: RoomCode_ScrollingSkyLand_(); return;
@@ -940,6 +950,7 @@ void CallRoomCode(uint32 ea) {
   case fnRoomCode_ShakeScreenHorizDiagStrong: RoomCode_ShakeScreenHorizDiagStrong(); return;
   case fnRoomCode_CrocomireShaking: RoomCode_CrocomireShaking(); return;
   case fnRoomCode_RidleyRoomShaking: RoomCode_RidleyRoomShaking(); return;
+  case fnRoomCode_ClearEnemy: RoomCode_ClearEnemy(); return;
   default: Unreachable();
   }
 }

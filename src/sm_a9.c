@@ -6060,6 +6060,7 @@ void Shitroid_Func_16(uint16 k) {  // 0xA9F21B
     CallSomeSamusCode(0x13);
     SomeMotherBrainScripts(0);
     E->shitr_var_04 = 0;
+    SetBossBitForCurArea(4);
     QueueMusic_Delayed8(7);
   } else {
     cooldown_timer = 8;

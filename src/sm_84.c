@@ -98,9 +98,11 @@ void LoadXrayBlocks(void) {  // 0x84831A
     int v1 = i >> 1;
     if (plm_header_ptr[v1] >= FUNC16(PlmPreInstr_GotoLinkIfTriggered)) {
       uint16 k = i;
+      if ((plm_room_arguments[v1] & 0x8000) != 0) goto one;
       uint16 v2 = item_bit_array[PrepareBitAccess(plm_room_arguments[v1])];
       i = k;
       if ((bitmask & v2) == 0) {
+one:
         CalculatePlmBlockCoords(k);
         const uint8 *v3 = RomPtr_84(kXrayBlockDrawingInstrs[plm_variables[k >> 1] >> 1]);
         LoadBlockToXrayTilemap(GET_WORD(v3 + 2) & 0xFFF, plm_x_block, plm_y_block);
@@ -251,7 +253,10 @@ CoroutineRet PlmHandler_Async(void) {  // 0x8485B4
     plm_instr_list_ptrs[v7] = v5 + 4 - base;
     ProcessPlmDrawInstruction(plm_id);
     CalculatePlmBlockCoords(plm_id);
+    uint8 v9 = waiting_for_nmi;
+    waiting_for_nmi = 0;
     DrawPlm(plm_id);
+    waiting_for_nmi = v9;
 NEXT_PLM:;
   }
   plm_id = 0;
@@ -425,6 +430,7 @@ const uint8 *PlmInstr_GotoIfItemBitSet(const uint8 *plmp, uint16 k) {  // 0x8488
 const uint8 *PlmInstr_SetItemBit(const uint8 *plmp, uint16 k) {  // 0x848899
   uint16 v2 = plm_room_arguments[k >> 1];
   if (!sign16(v2)) {
+    collected_total += 1;
     uint16 v3 = PrepareBitAccess(v2);
     item_bit_array[v3] |= bitmask;
   }
@@ -482,6 +488,7 @@ const uint8 *PlmInstr_CollectHealthEnergyTank(const uint8 *plmp, uint16 k) {  //
 
 const uint8 *PlmInstr_CollectHealthReserveTank(const uint8 *plmp, uint16 k) {  // 0x848986
   samus_max_reserve_health += GET_WORD(plmp);
+  samus_reserve_health = samus_max_reserve_health;
   if (!reserve_health_mode)
     ++reserve_health_mode;
   PlayRoomMusicTrackAfterAFrames(0x168);
@@ -495,6 +502,12 @@ const uint8 *PlmInstr_CollectAmmoMissileTank(const uint8 *plmp, uint16 k) {  // 
   samus_missiles += t;
   AddMissilesToHudTilemap();
   PlayRoomMusicTrackAfterAFrames(0x168);
+  if (samus_auto_cancel_hud_item_index == 0) {
+      uint16 v0 = joypad1_newkeys;
+      joypad1_newkeys = button_config_itemswitch;
+      HandleSwitchingHudSelection();
+      joypad1_newkeys = v0;
+  }
   DisplayMessageBox(2);
   return plmp + 2;
 }
@@ -633,6 +646,8 @@ const uint8 *PlmInstr_ClearMusicQueueAndQueueTrack(const uint8 *plmp, uint16 k) 
     music_queue_delay[v3] = 0;
   }
   music_queue_read_pos = music_queue_write_pos;
+  debug_saved_yscroll = 1;
+  CancelSoundEffects();
   music_timer = 0;
   music_entry = 0;
   QueueMusic_Delayed8(plmp[0]);
@@ -731,10 +746,11 @@ const uint8 *PlmInstr_ActivateEnergyStation(const uint8 *plmp, uint16 k) {  // 0
 }
 
 const uint8 *PlmInstr_ActivateMissileStation(const uint8 *plmp, uint16 k) {  // 0x848CD0
-  if (samus_max_missiles != samus_missiles) {
-    DisplayMessageBox(0x16);
-    samus_missiles = samus_max_missiles;
-  }
+  samus_missiles = samus_max_missiles;
+  samus_super_missiles = samus_max_super_missiles;
+  samus_power_bombs = samus_max_power_bombs;
+  DisplayMessageBox(0x16);
+  samus_missiles = samus_max_missiles;
   CallSomeSamusCode(1);
   return plmp;
 }
@@ -1103,7 +1119,7 @@ const uint8 *PlmInstr_GotoIfSamusHealthFull(const uint8 *plmp, uint16 k) {  // 0
 }
 
 const uint8 *PlmInstr_GotoIfMissilesFull(const uint8 *plmp, uint16 k) {  // 0x84AEBF
-  if (samus_max_missiles != samus_missiles)
+  //if (samus_max_missiles != samus_missiles)
     return plmp + 2;
   CallSomeSamusCode(1);
   return INSTRB_RETURN_ADDR(GET_WORD(plmp));
@@ -1257,7 +1273,7 @@ uint8 PlmSetup_B6EF_MissileStationRightAccess(uint16 j) {  // 0x84B2D0
   if ((samus_collision_direction & 0xF) != 0
       || samus_pose != kPose_8A_FaceL_Ranintowall
       || (samus_pose_x_dir & 4) == 0
-      || samus_missiles == samus_max_missiles) {
+      /*|| samus_missiles == samus_max_missiles*/) {
     plm_header_ptr[j >> 1] = 0;
     return 1;
   }
@@ -1268,7 +1284,7 @@ uint8 PlmSetup_B6F3_MissileStationLeftAccess(uint16 j) {  // 0x84B300
   if ((samus_collision_direction & 0xF) == 1
       && samus_pose == kPose_89_FaceR_Ranintowall
       && (samus_pose_x_dir & 8) != 0
-      && samus_missiles != samus_max_missiles) {
+      /*&& samus_missiles != samus_max_missiles*/) {
     return ActivateStationIfSamusCannonLinedUp(plm_block_indices[j >> 1] + 2, j);
   } else {
     plm_header_ptr[j >> 1] = 0;
@@ -1385,9 +1401,9 @@ static Func_Y_V *const kPlmSetup_QuicksandSurface[4] = {  // 0x84B408
   PlmSetup_QuicksandSurface_0,
 };
 
-static const uint16 g_word_84B48B[2] = { 0x200, 0x200 };
+static const uint16 g_word_84B48B[2] = { 0x000, 0x010 };
 static const uint16 g_word_84B48F[2] = { 0x120, 0x100 };
-static const uint16 g_word_84B493[2] = { 0x280, 0x380 };
+static const uint16 g_word_84B493[2] = { 0x600, 0x600 };
 
 uint8 PlmSetup_QuicksandSurface(uint16 j) {
 
@@ -1447,8 +1463,8 @@ uint8 PlmSetup_B723_SandfallsSlow(uint16 j) {  // 0x84B4A8
 }
 
 uint8 PlmSetup_B727_SandFallsFast(uint16 j) {  // 0x84B4B6
-  extra_samus_y_subdisplacement = -16384;
-  extra_samus_y_displacement = 1;
+  extra_samus_y_subdisplacement = 0;
+  extra_samus_y_displacement = 0;
   return 0;
 }
 
@@ -2203,15 +2219,7 @@ uint8 PlmSetup_RespawningShotBlock(uint16 j) {  // 0x84CE6B
 }
 
 uint8 PlmSetup_RespawningBombBlock(uint16 j) {  // 0x84CE83
-  if ((speed_boost_counter & 0xF00) == 1024
-      || samus_pose == kPose_81_FaceR_Screwattack
-      || samus_pose == kPose_82_FaceL_Screwattack
-      || samus_pose == kPose_C9_FaceR_Shinespark_Horiz
-      || samus_pose == kPose_CA_FaceL_Shinespark_Horiz
-      || samus_pose == kPose_CB_FaceR_Shinespark_Vert
-      || samus_pose == kPose_CC_FaceL_Shinespark_Vert
-      || samus_pose == kPose_CD_FaceR_Shinespark_Diag
-      || samus_pose == kPose_CE_FaceL_Shinespark_Diag) {
+  if ((uint16)(samus_contact_damage_index-1) < 3) {
     int v2 = j >> 1;
     int v3 = plm_block_indices[v2] >> 1;
     uint16 v4 = level_data[v3] & 0xF000 | 0x58;
@@ -2269,7 +2277,14 @@ uint8 PlmSetup_D08C_SuperMissileBlockRespawning(uint16 j) {  // 0x84CF67
   int16 v1;
 
   v1 = projectile_type[projectile_index >> 1] & 0xF00;
-  if (v1 == 1280) {
+  if (v1 == 0)
+      v1 = 1;
+  else if (v1 == 0x200)
+      v1 = v1;
+  else if (v1 == 0x500 || v1 == 0x300)
+      v1 = 0;
+
+  if (v1 == 0) {
     plm_instr_list_ptrs[j >> 1] = addr_kPlmInstrList_C922;
   } else if (v1 == 512) {
     int v2 = j >> 1;
@@ -2284,7 +2299,13 @@ uint8 PlmSetup_D08C_SuperMissileBlockRespawning(uint16 j) {  // 0x84CF67
 }
 
 uint8 PlmSetup_D08C_CrumbleBlock(uint16 j) {  // 0x84CFA0
-  if ((projectile_type[projectile_index >> 1] & 0xF00) != 1280)
+  int16 v1;
+
+  v1 = projectile_type[projectile_index >> 1] & 0xF00;
+  if (v1 == 0x500 || v1 == 0x300)
+      v1 = 0;
+
+  if (v1 != 1280)
     plm_header_ptr[j >> 1] = 0;
   return 0;
 }
@@ -2799,7 +2820,10 @@ const uint8 *PlmInstr_DrawItemFrame_Common(const uint8 *plmp, uint16 k) {  // 0x
   ProcessPlmDrawInstruction(k);
   uint16 v3 = plm_id;
   CalculatePlmBlockCoords(plm_id);
+  uint8 v9 = waiting_for_nmi;
+  waiting_for_nmi = 0;
   DrawPlm(v3);
+  waiting_for_nmi = v9;
   return 0;
 }
 
@@ -2895,6 +2919,12 @@ uint8 sub_84EEAB(uint16 v0) {  // 0x84EEAB
     plm_timers[i >> 1] = 255;
   }
   return 0;
+}
+
+const uint8* PlmInstr_Something(const uint8* plmp, uint16 k) { // 0x84EFFE
+    debug_saved_yscroll = 2;
+    QueueSfx1_Max6(plmp[0]);
+    return plmp + 1;
 }
 
 
@@ -3194,6 +3224,7 @@ const uint8 *CallPlmInstr(uint32 ea, const uint8 *j, uint16 k) {
   case fnPlmInstr_SetBtsTo1: return PlmInstr_SetBtsTo1(j, k);
   case fnPlmInstr_DisableSamusControls: return PlmInstr_DisableSamusControls(j, k);
   case fnPlmInstr_EnableSamusControls: return PlmInstr_EnableSamusControls(j, k);
+  case fnPlmInstr_SkipItem: {debug_saved_yscroll = 2; return PlmInstr_QueueSfx1_Max6(j, k); }
   default: Unreachable(); return NULL;
   }
 }

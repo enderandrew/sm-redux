@@ -529,7 +529,43 @@ void Samus_AlignYPosSlope(void) {  // 0x9487F4
       uint16 v2 = (kAlignYPos_Tab0[temp_collision_DD6 + (v1 & 0xF)] & 0x1F) - temp_collision_DD4 - 1;
       if ((int16)v2 < 0) {
         samus_y_pos += v2;
-        samus_pos_adjusted_by_slope_flag = 1;
+
+        if (samus_pose == kPose_C9_FaceR_Shinespark_Horiz) {
+            if ((button_config_right & joypad1_lastkeys) == 0)
+                samus_pos_adjusted_by_slope_flag = 1;
+            else {
+                samus_new_pose = kPose_09_MoveR_NoAim;
+                samus_pose_x_dir = kPose_08_FaceL_AimDL;
+                samus_movement_type = kMovementType_01_Running;
+                samus_x_extra_run_speed = 9;
+                Samus_MoveDown_NoSolidColl(IPAIR32(0xFFFE, 0));
+                samus_contact_damage_index = 1;
+                samus_has_momentum_flag = 1;
+                speed_boost_counter = 0x402;
+                samus_y_dir = 0;
+                samus_movement_handler = 0xA337;
+                samus_input_handler = 0xE913;
+            }
+        }
+        else if (samus_pose == kPose_CA_FaceL_Shinespark_Horiz) {
+            if ((button_config_left & joypad1_lastkeys) == 0)
+                samus_pos_adjusted_by_slope_flag = 1;
+            else {
+                samus_new_pose = kPose_0A_MoveL_NoAim;
+                samus_pose_x_dir = kPose_04_FaceL_AimU;
+                samus_movement_type = kMovementType_01_Running;
+                samus_x_extra_run_speed = 9;
+                Samus_MoveDown_NoSolidColl(IPAIR32(0xFFFE, 0));
+                samus_contact_damage_index = 1;
+                samus_has_momentum_flag = 1;
+                speed_boost_counter = 0x402;
+                samus_y_dir = 0;
+                samus_movement_handler = 0xA337;
+                samus_input_handler = 0xE913;
+            }
+        }
+        else
+            samus_pos_adjusted_by_slope_flag = 1;
       }
     }
   }
@@ -638,19 +674,27 @@ static uint8 ClearCarry_3(CollInfo *ci) {  // 0x948E81
 }
 
 static void BlockColl_SpikeBlock_BTS0(void) {  // 0x948E83
-  if ((area_index != 3 || CheckBossBitForCurArea(1) & 1) && !samus_invincibility_timer) {
-    samus_invincibility_timer = 60;
-    samus_knockback_timer = 10;
-    samus_periodic_damage += 60;
-    knockback_x_dir = ((samus_pose_x_dir ^ 0xC) & 8) != 0;
-  }
+    if (area_index == 3)
+        CheckBossBitForCurArea(1);
+    if (!samus_invincibility_timer) {
+        samus_invincibility_timer = 60;
+        samus_knockback_timer = 10;
+        uint16 v0 = samus_periodic_damage + 60;
+        if (player_data_saved[0x48 >> 2])
+            v0 *= 2;
+        samus_periodic_damage = v0;
+        knockback_x_dir = ((samus_pose_x_dir ^ 0xC) & 8) != 0;
+    }
 }
 
 static void BlockColl_SpikeBlock_BTS1(void) {  // 0x948ECF
   if (!samus_invincibility_timer) {
     samus_invincibility_timer = 60;
     samus_knockback_timer = 10;
-    samus_periodic_damage += 16;
+    uint16 v0 = samus_periodic_damage + 16;
+    if (player_data_saved[0x48 >> 2])
+        v0 *= 2;
+    samus_periodic_damage = v0;
     knockback_x_dir = ((samus_pose_x_dir ^ 0xC) & 8) != 0;
   }
 }
@@ -659,7 +703,10 @@ static void BlockColl_SpikeBlock_BTS3(void) {  // 0x948F0A
   if (!samus_invincibility_timer) {
     samus_invincibility_timer = 60;
     samus_knockback_timer = 10;
-    samus_periodic_damage += 16;
+    uint16 v0 = samus_periodic_damage + 16;
+    if (player_data_saved[0x48 >> 2])
+        v0 *= 2;
+    samus_periodic_damage = v0;
     knockback_x_dir = ((samus_pose_x_dir ^ 0xC) & 8) != 0;
   }
 }
@@ -1111,7 +1158,10 @@ static void BlockInsideReact_SpikeAir_BTS2(void) {  // 0x949866
   if (!samus_contact_damage_index && !samus_invincibility_timer) {
     samus_invincibility_timer = 60;
     samus_knockback_timer = 10;
-    samus_periodic_damage += 16;
+    uint16 v0 = samus_periodic_damage + 16;
+    if (player_data_saved[0x48 >> 2])
+        v0 *= 2;
+    samus_periodic_damage = v0;
     knockback_x_dir = ((*(uint16 *)&samus_pose_x_dir ^ 0xC) & 8) != 0;
   }
   samus_x_speed_table_pointer = addr_kSamusSpeedTable_Normal_X + 12;

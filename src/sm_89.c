@@ -91,6 +91,18 @@ void LoadFXHeader(void) {
   }
   fx_type = FD->type;
   if (FD->type) {
+      if (FD->type == 6 || FD->type == 12 || FD->type == 38) {
+          uint16 vram_update_flag, vram_update_dst, vram_update_size;
+          uint32 vram_update_src;
+          if (FD->type == 12)
+              vram_update_src = 0x9AC400;
+          else if (FD->type == 38 || FD->type == 6)
+              vram_update_src = 0x9AC200;
+          vram_update_dst = 0x4700;
+          vram_update_size = 0x200;
+          vram_update_flag = 0x80;
+          CopyToVramNow(vram_update_dst, vram_update_src, vram_update_size);
+      }
     fx_tilemap_ptr = kFxTypeTilemapPtrs[FD->type >> 1];
     kFxTypeFuncPtrs[FD->type >> 1]();
   }
