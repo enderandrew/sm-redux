@@ -2072,6 +2072,7 @@ uint16 CinematicSetPal4(uint16 k, uint16 j) {  // 0x8BA2A6
 
 CoroutineRet GameState_37_CeresGoesBoomWithSamus_(void) {  // 0x8BA35B
   CallCinematicFunction(cinematic_function | 0x8B0000);
+  uint16 v0 = 0;
   if (japanese_text_flag == 0) {
       int16 X = 8;
       while (cinematic_function != g_word_8BFB61[X]) {
@@ -2086,7 +2087,7 @@ CoroutineRet GameState_37_CeresGoesBoomWithSamus_(void) {  // 0x8BA35B
           X += 1;
       }
       goto one;
-  two:
+two:
       X = 7;
       while (cinematic_function != g_word_8BFB53[X]) {
           X -= 1;
@@ -2104,15 +2105,15 @@ CoroutineRet GameState_37_CeresGoesBoomWithSamus_(void) {  // 0x8BA35B
                   cinematic_function = 0xB72F;
                   goto one;
               }
-          three:
-              uint16 v0 = vram_write_queue_tail;
+three:
+              v0 = vram_write_queue_tail;
               gVramWriteEntry(vram_write_queue_tail)->size = 0xC0;
               v0 += 2;
               gVramWriteEntry(v0)->size = 0xFB71;
               v0 += 2;
               gVramWriteEntry(v0++)->size = 0x8B8B;
               HIBYTE(gVramWriteEntry(v0)->size) = 0x53;
-              vram_write_queue_tail += 7;
+              vram_write_queue_tail = v0 + 7;
           }
       }
       else {
