@@ -2106,7 +2106,7 @@ CoroutineRet GameState_37_CeresGoesBoomWithSamus_(void) {  // 0x8BA35B
               }
           three:
               uint16 v0 = vram_write_queue_tail;
-              gVramWriteEntry(v0)->size = 0xC0;
+              gVramWriteEntry(vram_write_queue_tail)->size = 0xC0;
               v0 += 2;
               gVramWriteEntry(v0)->size = 0xFB71;
               v0 += 2;
