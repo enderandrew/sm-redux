@@ -953,7 +953,7 @@ extern int32 *cur_coll_amt32;
 #define demo_set (*(uint16*)(g_ram+0x1F55))
 #define demo_scene (*(uint16*)(g_ram+0x1F57))
 #define num_demo_sets (*(uint16*)(g_ram+0x1F59))
-#define skip_cinematic_stuff (*(uint16*)(g_ram+0x1F68))
+#define skip_intro_flag (*(uint16*)(g_ram+0x1F68))
 #define tilemap_stuff ((uint16*)(g_ram+0x2000))
 #define ram3000 (*(Ram3000*)(g_ram+0x3000))
 #define ram3800 (*(Ram3800*)(g_ram+0x3800))

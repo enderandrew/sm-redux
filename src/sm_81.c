@@ -129,7 +129,7 @@ uint8 LoadFromSram(uint16 a) {
     uint16 A, X, Y = 0;
     uint16 r14 = 0;
     uint16 r12 = 2 * (a & 3);
-    uint16 r16 = kOffsetToSaveSlot[r12 >> 1];
+    uint16 r16 = kOffsetToSaveSlot[a & 3];
     X = r16;
     Y = 0;
     do {    //load sram items
@@ -158,17 +158,10 @@ uint8 LoadFromSram(uint16 a) {
         Y -= 2;
     } while ((int16)Y >= 0);
 
-    if ((kSramChecksum[r12 >> 1] == r14 && (kSramChecksum[r12 >> 1] ^ 0xFFF) == r14) || 
-        (r14 == kSramChecksumUpper[r12 >> 1] && (r14 ^ 0xFFFF) == kSramChecksumInvertedUpper[r12 >> 1])) {
-        for (int i = 94; i >= 0; i -= 2)    //load equipment
-            *(uint16*)((uint8*)&equipped_items + i) = player_data_saved[i >> 1];
-        load_station_index = sram_save_station_index;
-        area_index = sram_area_index;
-        return 0;
-    }
-    else if ((kSramChecksum[r12 >> 1] == r14 && (kSramChecksum[r12 >> 1] ^ 0xFFF) == r14) ||
-        (kSramChecksum[r12 >> 1] == kSramChecksumUpper[r12 >> 1] && (kSramChecksum[r12 >> 1] ^ 0xFFFF) == kSramChecksumInvertedUpper[r12 >> 1])) {
-        for (int i = 94; i >= 0; i -= 2)    //load equipment
+    if (r14 == kSramChecksum[r12 >> 1] && (kSramChecksum[r12 >> 1] ^ 0xffff) == r14
+        || r14 == kSramChecksum[r12 >> 1] && (kSramChecksum[r12 >> 1] ^ 0xffff) != r14 && r14 == kSramChecksumUpper[r12 >> 1] && (r14 ^ 0xffff) == kSramChecksumInvertedUpper[r12 >> 1]
+        || r14 != kSramChecksum[r12 >> 1] && kSramChecksum[r12 >> 1] == kSramChecksumUpper[r12 >> 1] && (kSramChecksum[r12 >> 1] ^ 0xffff) == kSramChecksumInvertedUpper[r12 >> 1]) {
+        for (int i = 94; i >= 0; i -= 2)
             *(uint16*)((uint8*)&equipped_items + i) = player_data_saved[i >> 1];
         load_station_index = sram_save_station_index;
         area_index = sram_area_index;

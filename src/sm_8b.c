@@ -32,10 +32,10 @@
 #define g_word_8BF6D8 ((uint16*)RomFixedPtr(0x8bf6d8))
 #define g_word_8CE1E9 ((uint16*)RomFixedPtr(0x8ce1e9))
 #define g_off_8CBC5D ((uint16*)RomFixedPtr(0x8cbc5d))
-#define g_word_8BFB61 ((uint16*)RomFixedPtr(0x8bfb61))
-#define g_word_8BFB53 ((uint16*)RomFixedPtr(0x8bfb53))
+#define kSkipIntro_FadingFuncs ((uint16*)RomFixedPtr(0x8bfb61))
+#define kSkipIntro_CutsceneFuncs ((uint16*)RomFixedPtr(0x8bfb53))
 #define kPalettes_Intro_Skip ((uint16*)RomFixedPtr(0x8bfb2d))
-#define g_word_8BFAF7 ((uint16*)RomFixedPtr(0x8bfaf7))
+#define kSkipIntro_Text ((uint16*)RomFixedPtr(0x8bfaf7))
 
 void CallCinematicFunction(uint32 ea);
 void CallCinematicSprPreInstr(uint32 ea, uint16 j);
@@ -2074,73 +2074,70 @@ CoroutineRet GameState_37_CeresGoesBoomWithSamus_(void) {  // 0x8BA35B
   CallCinematicFunction(cinematic_function | 0x8B0000);
   uint16 v0 = 0;
   if (japanese_text_flag == 0) {
-      int16 X = 8;
-      while (cinematic_function != g_word_8BFB61[X]) {
-          X -= 1;
+      int16 X = 16;
+      while (cinematic_function != kSkipIntro_FadingFuncs[X >> 1]) {
+          X -= 2;
           if (X < 0)
-              goto two;
+              goto no_fade;
       }
-      skip_cinematic_stuff = 0;
+      skip_intro_flag = 0;
       X = 0;
-      while (X < 25) {
-          ram3000.pause_menu_map_tilemap[803 + X] = 0x3C29;
-          X += 1;
+      while (X < 50) {
+          ram3000.pause_menu_map_tilemap[(0x646 + X) >> 1] = 0x3C29;
+          X += 2;
       }
-      goto one;
-two:
-      X = 7;
-      while (cinematic_function != g_word_8BFB53[X]) {
-          X -= 1;
+      goto cont;
+no_fade:
+      X = 14;
+      while (cinematic_function != kSkipIntro_CutsceneFuncs[X >> 1]) {
+          X -= 2;
           if (X < 0)
-              goto one;
+              goto cont;
       }
-      if (skip_cinematic_stuff) {
-          if (skip_cinematic_stuff >= 2) {
-              skip_cinematic_stuff -= 1;
-              goto three;
+      if (skip_intro_flag) {
+          if (skip_intro_flag >= 2) {
+              skip_intro_flag -= 1;
+              goto draw_text;
           }
           else {
               if ((joypad1_newkeys & kButton_Start) != 0) {
-                  skip_cinematic_stuff = 0;
+                  skip_intro_flag = 0;
                   cinematic_function = 0xB72F;
-                  goto one;
+                  goto draw_text;
               }
-three:
-              v0 = vram_write_queue_tail;
+draw_text:
               gVramWriteEntry(vram_write_queue_tail)->size = 0xC0;
-              v0 += 2;
-              gVramWriteEntry(v0)->size = 0xFB71;
-              v0 += 2;
-              gVramWriteEntry(v0++)->size = 0x8B8B;
-              HIBYTE(gVramWriteEntry(v0)->size) = 0x53;
-              vram_write_queue_tail = v0 + 7;
+              gVramWriteEntry(vram_write_queue_tail)->src.addr = 0xFB71;
+              gVramWriteEntry(vram_write_queue_tail)->src.bank = 0x8B;
+              gVramWriteEntry(vram_write_queue_tail)->vram_dst = 0x5300;
+              vram_write_queue_tail += 7;
           }
       }
       else {
           X = 0;
-          while (X < 25) {
-              ram3000.pause_menu_map_tilemap[803 + X] = 0x3C29;
-              X += 1;
+          while (X < 50) {
+              ram3000.pause_menu_map_tilemap[(0x646 + X) >> 1] = 0x3C29;
+              X += 2;
           }
-          if (((joypad1_newkeys & 0x40) == 0) && ((joypad1_newkeys & 0x80) == 0) && ((joypad1_newkeys & 0x8000) == 0) &&
-              ((joypad1_newkeys & 0x4000) == 0) && ((joypad1_newkeys & 0x10) == 0) && ((joypad1_newkeys & 0x20) == 0) &&
-              ((joypad1_newkeys & 0x1000) == 0))
-              goto one;
-          skip_cinematic_stuff = 0x20;
-          goto three;
+          if (((joypad1_newkeys & kButton_X) == 0) && ((joypad1_newkeys & kButton_A) == 0) && ((joypad1_newkeys & kButton_B) == 0) &&
+              ((joypad1_newkeys & kButton_Y) == 0) && ((joypad1_newkeys & kButton_R) == 0) && ((joypad1_newkeys & kButton_L) == 0) &&
+              ((joypad1_newkeys & kButton_Start) == 0))
+              goto cont;
+          skip_intro_flag = 0x20;
+          goto draw_text;
       }
-      X = 2;
+      X = 4;
       do {
-          palette_buffer[17 + X] = kPalettes_Intro_Skip[X];
-          X -= 1;
+          palette_buffer[(0x22 + X) >> 1] = kPalettes_Intro_Skip[X >> 1];
+          X -= 2;
       } while (X >= 0);
       X = 0;
-      while (X < 25) {
-          ram3000.pause_menu_map_tilemap[803 + X] = g_word_8BFAF7[X];
-          X += 1;
+      while (X < 50) {
+          ram3000.pause_menu_map_tilemap[(0x646 + X) >> 1] = kSkipIntro_Text[X >> 1];
+          X += 2;
       }
   }
-one:
+cont:
   if ((cinematic_var11 & 0x8000) == 0)
     ++cinematic_var11;
   ++cinematic_var12;
