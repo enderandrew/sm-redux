@@ -1,7 +1,28 @@
+# Building on OpenBSD
+Copy ROM to the cloned directory, then run the following:
+```
+gmake
+```
+Original README is preserved below.
+
 # sm
 
-This is port of the Super Metroid Redux hack, using the original port as a basis. The hack and all of its features can be found here: https://www.romhacking.net/hacks/4963/
+Our discord server is: https://discord.gg/AJJbJAzNNJ
 
-The only difference in building this port is that the rom you provide has to be a patched Super Metroid Redux rom. For building instructions, see: https://github.com/snesrev/sm/blob/main/BUILDING.md
+Early version. It has bugs and the code is messy.
 
-This version of the port has mismatches disabled for the time being. Credits and thanks to ShadowOne333 for creating the hack, to Metroid Construction and its members for creating many of the patches used, and to PJBoy's bank logs.
+For building instructions, see: [BUILDING](./BUILDING.md)
+
+When running, it runs an emulated version in the background and compares the ram state every frame. If it detects a mismatch, it saves a snapshot in saves/ and displays a counter on screen counting down from 300. Please submit these bug snapshots on discord so that they can be fixed.
+
+## Building on Windows
+You must self-build for now. Steps for 64-bit Windows:<br>
+<s>(0) Download [Python](https://www.python.org/ftp/python/3.11.4/python-3.11.4-amd64.exe) and install with "Add to PATH" checked</s><br>
+(1) Click the green button "Code > Download ZIP" on the github page and extract the ZIP<br>
+(2) Place your USA rom named sm.sfc in that folder<br>
+(3) Download [TCC](https://github.com/FitzRoyX/tinycc/releases/download/tcc_20230519/tcc_20230519.zip) and [SDL2](https://github.com/libsdl-org/SDL/releases/download/release-2.28.2/SDL2-devel-2.28.2-VC.zip) and extract each ZIP into the "third-party" subfolder<br>
+<s>(4) Double click "extract_assets.bat" in the main dir. This will create sm_assets.dat.</s><br>
+(5) Double-click "run_with_tcc.bat" in the main dir. This will create sm.exe and run it.<br>
+(6) Configure with sm.ini in a text editor like notepad++<br>
+
+For other platforms and compilers, see: https://github.com/snesrev/sm/blob/main/BUILDING.md
