@@ -669,7 +669,7 @@ void HandleMusicQueue(void) {  // 0x808F0C
     music_track_index = music_entry & 0x7F;
 
     //if (tilemap_stuff[1] == 53) //msu1 implementation, but there isn't msu1 support yet
-    
+
     RtlApuWrite(APUI00, music_entry & 0x7F);
     cur_music_track = v1;
     sound_handler_downtime = 8;
@@ -1724,7 +1724,7 @@ void ClearBG2Tilemap(void) {  // 0x80A23F
 void ClearFXTilemap(void) {  // 0x80A29C
   WriteRegWord(VMADDL, 0x5880);
   WriteRegWord(DMAP1, 0x1808);
-  WriteRegWord(A1T1L, 0xA2DF);  //originally 0xA2F7
+  WriteRegWord(A1T1L, 0xA2DF);  //originally 0xA29A
   WriteRegWord(A1B1, 0x80);
   WriteRegWord(DAS1L, 0x780);
   WriteReg(VMAIN, 0);

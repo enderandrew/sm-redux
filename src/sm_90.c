@@ -1562,9 +1562,9 @@ LABEL_11:;
 }
 
 void Samus_InitWallJump(void) {  // 0x909949
-  static const uint16 kSamus_InitWallJump_0[3] = { 4, 2, 2 };
+  static const uint16 kSamus_InitWallJump_0[3] = { 4, 0, 2 };
   static const uint16 kSamus_InitWallJump_1[3] = { 0xa000, 0x4000, 0xa000 };
-  static const uint16 kSamus_InitWallJump_2[3] = { 5, 2, 3 };
+  static const uint16 kSamus_InitWallJump_2[3] = { 5, 0, 3 };
   static const uint16 kSamus_InitWallJump_3[3] = { 0x8000, 0x8000, 0x8000 };
   uint16 v0;
 
@@ -2640,7 +2640,7 @@ void KillProjectile(uint16 k) {
   int v1 = k >> 1;
   if ((projectile_type[v1] & 0xF00) != 0) {
     if (!sign16((HIBYTE(projectile_type[v1]) & 0xF) - 3)) {
-      //ClearProjectile(k);
+      ClearProjectile(k);
       return;
     }
   } else {
@@ -3047,10 +3047,10 @@ static const uint16 kInitializeProjectileSpeed_XY_Diag[24] = {  // 0x90B197
   0x400, 0x2ab,
   0x400, 0x2ab,
   0x400, 0x2ab,
-  0x600, 0x4ab,
-  0x600, 0x4ab,
-  0x600, 0x4ab,
-  0x600, 0x4ab,
+  0x400, 0x1ab,
+  0x400, 0x1ab,
+  0x400, 0x1ab,
+  0x400, 0x1ab,
 };
 
 void SetInitialProjectileSpeed(uint16 r20) {
@@ -4328,7 +4328,7 @@ uint8 SwitchToHudHandler_PowerBombs(void) {  // 0x90C577
 uint8 SwitchToHudHandler_Grapple(void) {  // 0x90C58A
     return swap16(equipped_items & 0x4000);
   /*if (grapple_beam_function == FUNC16(GrappleBeamFunc_Inactive)) {
-    Samus_LoadSuitPalette();
+	  Samus_LoadSuitPalette();
     flare_counter = 0;
     ClearFlareAnimationState();
     grapple_beam_function = FUNC16(GrappleBeamFunc_Inactive);

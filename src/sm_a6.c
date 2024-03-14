@@ -1653,7 +1653,7 @@ void CeresRidley_Func_28(void) {  // 0xA6AABD
   /*if (cry_var_33 == 208) {
     Samus_SetPushedOutOfCeresRidley();
     earthquake_type = 35;
-    /earthquake_timer = 64;
+    earthquake_timer = 64;
   }*/
   int v2 = cry_var_33 >> 1;
   if (g_word_A6AE4D[v2] == 0xFFFF) {

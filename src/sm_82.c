@@ -1186,7 +1186,7 @@ void ClearBG3(void) {
   WriteReg(VMADDH, 0x40);
   WriteReg(VMAIN, 0x80);
   static const StartDmaCopy unk_828ECB = { 1, 1, 0x18, LONGPTR(0x9ab200), 0x1000 };
-  SetupDmaTransfer(&unk_828ECB);
+  SetupDmaTransfer(&unk_828ECB); 
   WriteReg(MDMAEN, 2);
 }
 
@@ -2817,6 +2817,7 @@ void WriteSamusWireframeTilemapAndQueue(void) {  // 0x82B1E0
   vram_write_queue_tail = v0 + 2;
 }
 
+
 void DrawGameTime(void) {
     ram3800.cinematic_bg_tilemap[0x1F0/2] = 0x0EBC;
     ram3800.cinematic_bg_tilemap[0x1F6/2] = 0x0EBC;
@@ -3044,12 +3045,12 @@ void EquipmentScreenCategory_ButtonResponse(uint16 r24) {  // 0x82B568
     if ((*var & mask) != 0) {
       *var &= ~mask;
       ChangePaletteValues((uint16*)target, 0xc00, r24 >> 1);
-      SetPauseScreenSuitPalettes();
+	  SetPauseScreenSuitPalettes();
     } else {
       *var |= mask;
       uint16 src = *(uint16 *)RomPtr_82(kEquipmentPtrsToEquipmentTilemaps[category] + item * 2);
       memcpy(target, RomPtr_82(src), r24);
-      SetPauseScreenSuitPalettes();
+	  SetPauseScreenSuitPalettes();
     }
   }
 }
@@ -3444,7 +3445,6 @@ void QueueSamusMovementSfx(void) {  // 0x82BE2F
     QueueSfx1_Max6(0x41);
   CallSomeSamusCode(0x14);
 }
-
 
 uint8 AdvancePaletteFadeForAllPalettes_0xc(void) {  // 0x82D961
   palette_change_denom = 6;

@@ -558,7 +558,7 @@ void LoadDemoData(void) {
 }
 
 void DemoSetFunc_0(void) {  // 0x918A33
-    DemoSetFunc_3();
+  DemoSetFunc_3();
 }
 
 void DemoSetFunc_3(void) {  // 0x918A3E
@@ -1569,7 +1569,7 @@ LABEL_10:
     uint16 v5 = special_samus_palette_frame + 2;
     //if (special_samus_palette_frame >= 6)
       //v5 = 6;
-    special_samus_palette_frame = v5;
+  special_samus_palette_frame = v5;
   }
   return 1;
 }

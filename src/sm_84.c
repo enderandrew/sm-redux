@@ -98,7 +98,7 @@ void LoadXrayBlocks(void) {  // 0x84831A
     int v1 = i >> 1;
     if (plm_header_ptr[v1] >= FUNC16(PlmPreInstr_GotoLinkIfTriggered)) {
       uint16 k = i;
-      if ((plm_room_arguments[v1] & 0x8000) != 0) goto one;
+	  if ((plm_room_arguments[v1] & 0x8000) != 0) goto one;
       uint16 v2 = item_bit_array[PrepareBitAccess(plm_room_arguments[v1])];
       i = k;
       if ((bitmask & v2) == 0) {
@@ -1273,7 +1273,7 @@ uint8 PlmSetup_B6EF_MissileStationRightAccess(uint16 j) {  // 0x84B2D0
   if ((samus_collision_direction & 0xF) != 0
       || samus_pose != kPose_8A_FaceL_Ranintowall
       || (samus_pose_x_dir & 4) == 0
-      /*|| samus_missiles == samus_max_missiles*/) {
+      || samus_missiles == samus_max_missiles) {
     plm_header_ptr[j >> 1] = 0;
     return 1;
   }
@@ -1284,7 +1284,7 @@ uint8 PlmSetup_B6F3_MissileStationLeftAccess(uint16 j) {  // 0x84B300
   if ((samus_collision_direction & 0xF) == 1
       && samus_pose == kPose_89_FaceR_Ranintowall
       && (samus_pose_x_dir & 8) != 0
-      /*&& samus_missiles != samus_max_missiles*/) {
+       /*&& samus_missiles != samus_max_missiles*/) {
     return ActivateStationIfSamusCannonLinedUp(plm_block_indices[j >> 1] + 2, j);
   } else {
     plm_header_ptr[j >> 1] = 0;

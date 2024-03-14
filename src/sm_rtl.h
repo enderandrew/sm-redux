@@ -84,7 +84,7 @@ static inline const uint8 *RomPtr_A9(uint16_t addr) { return RomPtr(0xa90000 | a
 static inline const uint8 *RomPtr_AD(uint16_t addr) { return RomPtr(0xad0000 | addr); }
 static inline const uint8 *RomPtr_B3(uint16_t addr) { return RomPtr(0xb30000 | addr); }
 static inline const uint8 *RomPtr_B4(uint16_t addr) { return RomPtr(0xb40000 | addr); }
-static inline const uint8* RomPtr_B6(uint16_t addr) { return RomPtr(0xb60000 | addr); }
+static inline const uint8 *RomPtr_B6(uint16_t addr) { return RomPtr(0xb60000 | addr); }
 static inline const uint8 *RomPtr_B7(uint16_t addr) { return RomPtr(0xb70000 | addr); }
 static inline const uint8 *RomPtrWithBank(uint8 bank, uint16_t addr) { return RomPtr((bank << 16) | addr); }
 static inline const uint8 *RomBankBase(uint8 bank) { return RomPtr((bank << 16) + 0x8000) - 0x8000; }

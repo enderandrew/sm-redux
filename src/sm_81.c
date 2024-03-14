@@ -31,7 +31,6 @@
 #define kDifficulty ((uint16*)RomFixedPtr(0x81fa21))
 
 
-
 static const uint16 kFileSelectMap_AreaIndexes[6] = { 0, 3, 5, 1, 4, 2 };
 
 void SoftReset(void) {
@@ -124,6 +123,7 @@ void SaveToSram(uint16 a) {
 
   RtlWriteSram();
 }*/
+
 
 uint8 LoadFromSram(uint16 a) {
     uint16 A, X, Y = 0;
